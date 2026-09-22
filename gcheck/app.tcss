@@ -1,0 +1,418 @@
+/* ── Global ───────────────────────────────────────────────────────────────── */
+
+/* Border style for all Button widgets (see the "── Buttons ──" section below).
+   One of: tall, solid, heavy, round. Textual's default "tall" draws with
+   fractional block glyphs that some terminal fonts render at the wrong
+   proportions, collapsing the button border -- "solid"/"heavy"/"round" use
+   plain box-drawing lines instead, which render consistently. Change this
+   one value to try a different style everywhere. 
+   see what border availiable:https://textual.textualize.io/styles/border/
+   */
+$button-border: tall;
+
+Screen {
+    background: $background;
+    color: $foreground;
+}
+
+Footer {
+    background: $background;
+    color: $text-muted;
+}
+
+
+/* ── App Header ──────────────────────────────────────────────────────────── */
+
+AppHeader {
+    layout: horizontal;
+    dock: top;
+    height: 2;
+    background: $panel;
+    padding: 0 2;
+    border-bottom: solid $panel-lighten-1;
+}
+
+#header-title {
+    width: 1fr;
+    color: $title;
+    text-style: bold;
+}
+
+
+/* ── Language Screen ─────────────────────────────────────────────────────── */
+
+#lang-container {
+    align: center middle;
+    height: 1fr;
+    width: 1fr;
+    overflow-y: auto;
+}
+
+#lang-title {
+    text-style: bold;
+    color: $title;
+    margin-bottom: 1;
+    padding: 0 1;
+}
+
+#lang-cards {
+    layout: grid;
+    grid-size: 2 2;
+    grid-gutter: 1 2;
+    height: auto;
+    width: 58;
+}
+
+.lang-card {
+    width: 28;
+    height: 5;
+    border: round $panel-lighten-1;
+    padding: 1 2;
+    background: $surface;
+}
+
+.lang-card:hover {
+    border: round $primary;
+    background: $surface-lighten-1;
+}
+
+.lang-card.selected {
+    border: round $primary;
+    background: $surface-lighten-1;
+}
+
+.lang-card:focus {
+    border: round $primary;
+    background: $surface-lighten-1;
+}
+
+.lang-card-label {
+    text-style: bold;
+    color: $foreground;
+}
+
+
+/* ── Trust Screen ────────────────────────────────────────────────────────── */
+
+#trust-container {
+    align: center middle;
+    height: 1fr;
+    width: 1fr;
+    overflow-y: auto;
+}
+
+#trust-title {
+    text-style: bold;
+    color: $title;
+    width: 64;
+    margin-bottom: 1;
+}
+
+#trust-cwd {
+    color: $foreground;
+    width: 64;
+    margin-bottom: 2;
+}
+
+#trust-buttons {
+    height: auto;
+    width: 64;
+    align-horizontal: right;
+}
+
+#trust-buttons Button {
+    margin-right: 1;
+}
+
+/* ── Buttons ──────────────────────────────────────────────────────────────── */
+/* Two visual types, told apart by fill:
+     - Primary (variant="primary")  -- solid white fill, with $button-tertiary
+       (the secondary button's grey fill color) as its text. The screen's
+       default action; auto-focused on arrival (see app.py's AUTO_FOCUS /
+       widgets.focus_primary_button).
+     - Secondary (.btn-secondary class) / tertiary (default variant, e.g.
+       Quit) -- muted $button-tertiary fill with light text.
+   Focus (and hover) is what shows a button at its "true" color: at rest the
+   fill is dimmed by a 25% $background tint, and hover/focus drops that tint
+   to 0% and casts a $primary drop-shadow along the bottom + right edges.
+   The shadow lives in the "border: blank" cells every button already
+   reserves, so nothing shifts when it appears. The hover/focus rules also
+   re-assert a non-reverse text-style, which neutralizes Textual's built-in
+   Button :focus treatment. */
+
+/* Primary -- filled white, grey text (the secondary button's fill color). */
+Button.-primary {
+    background: $button-primary;
+    background-tint: $background 50%;
+    color: $button-tertiary;
+    border: blank;
+}
+
+Button.-primary:hover,
+Button.-primary:focus {
+    background-tint: $background 0%;
+    text-style: bold;
+}
+
+Button.-primary.-active {
+    background: $button-primary;
+    background-tint: $background 0%;
+    color: $button-tertiary;
+}
+
+/* Secondary + tertiary -- muted fill, light text. */
+Button,
+Button.btn-secondary {
+    background: $button-tertiary;
+    background-tint: $background 50%;
+    color: $button-secondary;
+    border: blank;
+}
+
+Button:hover,
+Button:focus,
+Button.btn-secondary:hover,
+Button.btn-secondary:focus {
+    background-tint: $background 0%;
+    text-style: bold;
+}
+
+/* Drop-shadow on hover/focus -- bottom + right edges only, drawn in the
+   reserved "border: blank" cells so the box never resizes. Explicit
+   per-type selectors so each outranks its own "border: blank" base rule. */
+
+Button.-primary:hover,
+Button.-primary:focus{
+    border-top: hkey #ffffff;
+    border-bottom: hkey $button-primary 50%;
+}
+
+Button:hover,
+Button:focus,
+Button.btn-secondary:hover,
+Button.btn-secondary:focus {            
+    border-top: hkey #5a5a5a;
+    border-bottom: hkey $button-tertiary 50%;
+}
+
+
+/* ── Api Finding Screen ──────────────────────────────────────────────────── */
+
+#api-finding-container {
+    align: center middle;
+    height: 1fr;
+    width: 1fr;
+    overflow-y: auto;
+}
+
+#api-finding-title {
+    text-style: bold;
+    color: $title;
+    width: 64;
+    margin-bottom: 1;
+}
+
+#api-finding-notice {
+    color: $foreground;
+    width: 64;
+    margin-bottom: 2;
+}
+
+#api-finding-status {
+    width: 64;
+}
+
+#api-finding-result {
+    align: center middle;
+    height: auto;
+    width: auto;
+}
+
+#api-finding-message {
+    color: $purple;
+    width: 64;
+    margin-bottom: 1;
+}
+
+#api-finding-picker {
+    width: 64;
+    height: auto;
+    max-height: 12;
+    margin-bottom: 1;
+    border: round $panel-lighten-1;
+    background: $surface;
+}
+
+#api-finding-input {
+    width: 64;
+    margin-bottom: 1;
+    border: round $purple;
+}
+
+#api-finding-input:focus {
+    border: round $purple;
+}
+
+#api-finding-token-notice {
+    width: 64;
+    color: $purple;
+    text-style: italic;
+    margin-bottom: 2;
+}
+
+#api-finding-buttons {
+    height: auto;
+    width: 64;
+    align-horizontal: right;
+}
+
+#api-finding-buttons Button {
+    margin-right: 1;
+}
+
+
+/* ── Api Key Test Screen ─────────────────────────────────────────────────── */
+
+#api-test-container {
+    align: center middle;
+    height: 1fr;
+    width: 1fr;
+    overflow-y: auto;
+}
+
+#api-test-title {
+    text-style: bold;
+    color: $title;
+    width: 76;
+    margin-bottom: 1;
+}
+
+#api-test-status {
+    width: 76;
+}
+
+#api-test-result {
+    align: center middle;
+    height: auto;
+    width: auto;
+}
+
+#api-test-summary {
+    width: 76;
+    margin-bottom: 1;
+}
+
+#api-test-error-label {
+    width: 76;
+    color: $error;
+    text-style: bold;
+    margin-bottom: 1;
+}
+
+#api-test-error-box {
+    width: 76;
+    height: 6;
+    margin-bottom: 2;
+    border: round $error;
+    background: $surface;
+}
+
+#api-test-result-text {
+    width: 76;
+    margin-bottom: 2;
+}
+
+#api-test-buttons {
+    height: auto;
+    width: 76;
+    align-horizontal: right;
+}
+
+/* Success case hides the retry button, leaving only quit -- left-align it
+   instead of stranding a lone button at the far right edge. */
+#api-test-buttons.-left {
+    align-horizontal: left;
+}
+
+#api-test-buttons Button {
+    margin-right: 1;
+}
+
+
+/* ── Diagnostic Screen ───────────────────────────────────────────────────── */
+
+/* Centered, max-width column -- same treatment as the API key test screen
+   (#api-test-container), rather than letting the report stretch full-width. */
+#diag-container {
+    align: center middle;
+    height: 1fr;
+    padding: 1 2;
+    overflow-y: auto;
+}
+
+.diag-loading-header,
+#diag-loading-status {
+    width: 76;
+}
+
+/* Network connection info and the per-tier pass/fail summary, styled like the
+   API key test screen's result panels -- colored headline per tier, no
+   subtest breakdown, rather than a scrolling plain-text transcript. */
+#diag-network,
+#diag-tiers {
+    height: auto;
+    width: 76;
+    border: round $panel-lighten-1;
+    background: $surface;
+    padding: 1 2;
+    margin-bottom: 1;
+}
+
+#diag-diagnosis,
+#diag-recommendations {
+    height: auto;
+    width: 76;
+    margin-bottom: 1;
+}
+
+/* Fix instructions -- a read-only TextArea (not a colored Static) so the
+   shell commands can be selected and copied, same as the API test screen's
+   raw error box. */
+#diag-fix-label {
+    color: $primary;
+    text-style: bold;
+    width: 76;
+    margin-bottom: 1;
+}
+
+#diag-fix-box {
+    height: 14;
+    width: 76;
+    margin-bottom: 1;
+    border: round $primary;
+    background: $surface;
+}
+
+#diag-buttons {
+    height: auto;
+    width: 76;
+    margin-top: 1;
+    align-horizontal: right;
+}
+
+#diag-buttons Button {
+    margin-right: 1;
+}
+
+
+.msg-thinking {
+    color: $foreground;
+    text-style: italic;
+    margin-bottom: 1;
+}
+
+.diag-loading-header {
+    color: $title;
+    text-style: bold;
+    margin-top: 1;
+}

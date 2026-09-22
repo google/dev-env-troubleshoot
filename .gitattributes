@@ -1,0 +1,24 @@
+# Normalize all text files to LF in the repository. Without this, the
+# committed bytes depend on each contributor's core.autocrlf setting, and a
+# shell script committed with CRLF fails on macOS/Linux with
+# `/bin/sh^M: bad interpreter`.
+* text=auto
+
+# Shell scripts must be LF in the working tree on every platform -- these are
+# executed by sh, which treats a trailing CR as part of the shebang path.
+*.sh text eol=lf
+
+# PowerShell is happiest with CRLF on Windows, where it actually runs.
+*.ps1 text eol=crlf
+
+*.py text diff=python
+*.json text eol=lf
+*.md text eol=lf
+*.toml text eol=lf
+*.yml text eol=lf
+*.tcss text eol=lf
+
+# Binary -- never touch line endings.
+*.png binary
+*.ico binary
+*.xlsx binary

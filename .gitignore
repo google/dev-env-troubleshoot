@@ -1,0 +1,29 @@
+*.env
+*.pyc
+__pycache__/
+/venv
+/.venv
+/.venv*
+.coverage
+.pytest_cache/
+
+# Packaging artifacts
+*.egg-info/
+*.egg
+
+# Editors / IDEs
+.vscode/
+.idea/
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Tooling caches and coverage output
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+
+# Local env files beyond the *.env glob above (e.g. .env.local, .env.staging)
+.env.*
+!.env.example
