@@ -26,6 +26,12 @@
   "action_next": "次へ",
   "action_quit": "終了",
   "divider": "─────────────────────────────────────",
+  "footer_previous": "前へ",
+  "footer_next": "次へ",
+  "footer_up": "上へ",
+  "footer_down": "下へ",
+  "footer_select": "選択",
+  "footer_quit": "終了",
 
   "api_finding_title": "Google Gemini API キーを検証",
   "api_finding_notice": "Gemini API のエンドポイントに対してキーを検証します。キーが必要ですか？ https://aistudio.google.com/ で取得できます",

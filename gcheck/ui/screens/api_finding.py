@@ -13,17 +13,18 @@
 # limitations under the License.
 
 import os
+import sys
 
 from textual.app import ComposeResult
+from textual.binding import Binding
 from textual.containers import Container, Horizontal
-from textual.screen import Screen
 from textual.widgets import Button, Footer, Input, Label, RadioButton, RadioSet, Static
 from textual import events, on, work
 
 from ...api_diagnostic.models import FoundKey
 from ...code_setup import find_api_keys
 from ...i18n import t
-from ..widgets import AppHeader, _SPINNER_FRAMES, _mask_key
+from ..widgets import AppHeader, LocalizedScreen, _SPINNER_FRAMES, _mask_key
 
 
 class _KeyPicker(RadioSet):
@@ -40,14 +41,74 @@ class _KeyPicker(RadioSet):
             super().action_next_button()
 
 
-class ApiFindingScreen(Screen):
+def _read_clipboard_native() -> str:
+    """The system clipboard's text, or "" if it can't be read. Windows only --
+    elsewhere the terminal itself turns Ctrl+V into a bracketed paste."""
+    if sys.platform != "win32":
+        return ""
+    import ctypes
+    from ctypes import wintypes
+
+    CF_UNICODETEXT = 13
+    user32 = ctypes.WinDLL("user32", use_last_error=True)
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    # Explicit argtypes/restype: without them ctypes treats handles as 32-bit
+    # ints, which can truncate them on 64-bit Python.
+    user32.OpenClipboard.argtypes = [wintypes.HWND]
+    user32.OpenClipboard.restype = wintypes.BOOL
+    user32.GetClipboardData.argtypes = [wintypes.UINT]
+    user32.GetClipboardData.restype = wintypes.HANDLE
+    kernel32.GlobalLock.argtypes = [wintypes.HGLOBAL]
+    kernel32.GlobalLock.restype = ctypes.c_void_p
+    kernel32.GlobalUnlock.argtypes = [wintypes.HGLOBAL]
+
+    if not user32.OpenClipboard(None):
+        return ""
+    try:
+        handle = user32.GetClipboardData(CF_UNICODETEXT)
+        if not handle:
+            return ""
+        pointer = kernel32.GlobalLock(handle)
+        if not pointer:
+            return ""
+        try:
+            return ctypes.wstring_at(pointer)
+        finally:
+            kernel32.GlobalUnlock(handle)
+    finally:
+        user32.CloseClipboard()
+
+
+class _KeyInput(Input):
+    """The manual API-key Input, plus a Ctrl+V that reads the system
+    clipboard. Windows Terminal intercepts Ctrl+V itself and sends a
+    bracketed paste (a normal Paste event), but the classic console behind
+    cmd.exe / PowerShell doesn't: once Textual switches it to VT input mode,
+    Ctrl+V reaches the app as a plain ctrl+v keypress, which a stock Input
+    ignores -- so pasting a key there silently did nothing."""
+
+    BINDINGS = [Binding("ctrl+v", "paste_clipboard", "Paste", show=False)]
+
+    def action_paste_clipboard(self) -> None:
+        try:
+            text = _read_clipboard_native()
+        except OSError:
+            text = ""
+        # Like Input._on_paste, keep only the first line -- an API key is one
+        # line, and a copy from a browser/editor often drags a newline along.
+        lines = text.strip().splitlines()
+        if lines:
+            self.insert_text_at_cursor(lines[0].strip())
+
+
+class ApiFindingScreen(LocalizedScreen):
     """Step 5 — search for existing API key(s); confirm, pick, or replace one."""
 
     BINDINGS = [
-        ("left",  "prev_button", "Previous"),
-        ("right", "next_button", "Next"),
-        ("up",    "prev_button", "Previous"),
-        ("down",  "next_button", "Next"),
+        ("left",  "prev_button", "footer_previous"),
+        ("right", "next_button", "footer_next"),
+        ("up",    "prev_button", "footer_previous"),
+        ("down",  "next_button", "footer_next"),
     ]
 
     def action_prev_button(self) -> None:
@@ -65,7 +126,7 @@ class ApiFindingScreen(Screen):
             Container(
                 Label("", id="api-finding-message"),
                 _KeyPicker(id="api-finding-picker"),
-                Input(id="api-finding-input", placeholder=t("api_finding_input_placeholder")),
+                _KeyInput(id="api-finding-input", placeholder=t("api_finding_input_placeholder")),
                 Static(t("api_finding_token_notice"), id="api-finding-token-notice"),
                 Horizontal(
                     Button(t("action_quit"), variant="default", id="btn-api-quit"),

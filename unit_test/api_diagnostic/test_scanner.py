@@ -42,6 +42,14 @@ def test_named_assignment_placeholder_variants():
         assert _scan_line(f"GOOGLE_GENAI_API_KEY={placeholder}") == [], placeholder
 
 
+def test_named_assignment_interpolation_is_skipped():
+    # e.g. this very test suite's f"GEMINI_API_KEY={STANDARD_KEY}" source
+    # lines -- a reference to a key, not a key.
+    for ref in ["{STANDARD_KEY}", "${GEMINI_API_KEY}", "$GEMINI_API_KEY"]:
+        assert _scan_line(f"GEMINI_API_KEY={ref}") == [], ref
+        assert _scan_line(f'export GOOGLE_API_KEY="{ref}"') == [], ref
+
+
 def test_value_pattern_without_matching_var_name():
     line = f"const cfg = {{ token: '{STANDARD_KEY}' }};"
     hits = _scan_line(line)

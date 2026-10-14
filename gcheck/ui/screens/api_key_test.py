@@ -15,7 +15,6 @@
 from rich.markup import escape
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal
-from textual.screen import Screen
 from textual.widget import Widget
 from textual.widgets import Button, Footer, Label, Static, TextArea
 from textual import on, work
@@ -25,7 +24,7 @@ from ...api_diagnostic import recommendations as api_recommendations
 from ...api_diagnostic.models import ApiTestResult
 from ...i18n import t
 from ..theme import BLUE, ERROR_EMOJI, GREEN, RECOMMENDATION_EMOJI, RED, SUCCESS_EMOJI, WHITE
-from ..widgets import AppHeader, _SPINNER_FRAMES, focus_primary_button
+from ..widgets import AppHeader, LocalizedScreen, _SPINNER_FRAMES, focus_primary_button
 
 TROUBLESHOOTING_URL = "https://ai.google.dev/gemini-api/docs/troubleshooting"
 
@@ -64,14 +63,14 @@ class _ErrorBox(TextArea):
             super().action_cursor_right(select=select)
 
 
-class ApiKeyTestScreen(Screen):
+class ApiKeyTestScreen(LocalizedScreen):
     """Step 6 — validate the chosen key against Google. Final step of the flow."""
 
     BINDINGS = [
-        ("left",  "prev_button", "Previous"),
-        ("right", "next_button", "Next"),
-        ("up",    "prev_button", "Previous"),
-        ("down",  "next_button", "Next"),
+        ("left",  "prev_button", "footer_previous"),
+        ("right", "next_button", "footer_next"),
+        ("up",    "prev_button", "footer_previous"),
+        ("down",  "next_button", "footer_next"),
     ]
 
     # Plain focus_previous()/focus_next() (as every other screen uses) would

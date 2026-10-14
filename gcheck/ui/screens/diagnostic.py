@@ -15,7 +15,6 @@
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
-from textual.screen import Screen
 from textual.widgets import Button, Footer, Static
 from textual import on, work
 
@@ -33,6 +32,7 @@ from ...recommendations import build_diagnosis
 from ..theme import BLUE, RECOMMENDATION_EMOJI
 from ..widgets import (
     AppHeader,
+    LocalizedScreen,
     _SPINNER_FRAMES,
     _google_ok_line,
     _info_block,
@@ -42,7 +42,7 @@ from ..widgets import (
 )
 
 
-class DiagnosticScreen(Screen):
+class DiagnosticScreen(LocalizedScreen):
     """Step 3 — gate check → collapsed per-tier pass/fail summary → diagnosis."""
 
     # The report's only focusable widgets are the buttons in one row, so
@@ -50,8 +50,8 @@ class DiagnosticScreen(Screen):
     # report (via #diag-container, the overflow-y: auto element) -- which
     # matters here because the diagnosis can run past a short terminal.
     BINDINGS = [
-        ("left",  "prev_button", "Previous"),
-        ("right", "next_button", "Next"),
+        ("left",  "prev_button", "footer_previous"),
+        ("right", "next_button", "footer_next"),
         Binding("up",   "scroll_up",   "Scroll up",   show=False),
         Binding("down", "scroll_down", "Scroll down", show=False),
     ]

@@ -26,6 +26,12 @@
   "action_next": "Next",
   "action_quit": "Exit",
   "divider": "─────────────────────────────────────",
+  "footer_previous": "Previous",
+  "footer_next": "Next",
+  "footer_up": "Up",
+  "footer_down": "Down",
+  "footer_select": "Select",
+  "footer_quit": "Quit",
 
   "api_finding_title": "Validate Google Gemini API Key",
   "api_finding_notice": "Validates your key against Gemini API endpoints. Need a key? Get one at https://aistudio.google.com/",

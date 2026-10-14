@@ -74,6 +74,8 @@ PLACEHOLDER_RE = re.compile(
         your[_-].*key.*        |   # your_api_key_here, your-key-here
         <.*>                   |   # <your-api-key>, <GEMINI_API_KEY>
         \{\{.*\}\}              |   # {{API_KEY}}
+        \$?\{[^{}]*\}          |   # {STANDARD_KEY} (f-string/.format), ${GEMINI_API_KEY}
+        \$[A-Z_][A-Z0-9_]*     |   # $GEMINI_API_KEY (shell/env reference)
         x{4,}                  |   # xxxxxxxx
         \*{3,}                 |   # ***
         \.{3,}                 |   # ...

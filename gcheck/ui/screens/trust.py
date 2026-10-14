@@ -17,23 +17,22 @@ import os
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Container, Horizontal
-from textual.screen import Screen
 from textual.widgets import Button, Footer, Label
 from textual import on
 
 from ...i18n import t
-from ..widgets import AppHeader
+from ..widgets import AppHeader, LocalizedScreen
 
 
-class TrustScreen(Screen):
+class TrustScreen(LocalizedScreen):
     """Step 2 — folder trust confirmation."""
 
     # The only focusable widgets are the two buttons, side by side, so
     # Left/Right moves between them and Up/Down is freed up to scroll the
     # page (via #trust-container, which is the overflow-y: auto element).
     BINDINGS = [
-        ("left",  "prev_button", "Previous"),
-        ("right", "next_button", "Next"),
+        ("left",  "prev_button", "footer_previous"),
+        ("right", "next_button", "footer_next"),
         Binding("up",   "scroll_up",   "Scroll up",   show=False),
         Binding("down", "scroll_down", "Scroll down", show=False),
     ]

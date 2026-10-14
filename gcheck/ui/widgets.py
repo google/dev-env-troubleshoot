@@ -12,13 +12,46 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from dataclasses import replace
+
 from rich.markup import escape
 from textual.app import ComposeResult
+from textual.binding import BindingsMap
 from textual.containers import Horizontal
+from textual.dom import DOMNode
+from textual.screen import Screen
 from textual.widgets import Button, Label, Static
 
 from ..i18n import t
 from .theme import DIAGNOSTIC_EMOJI, ERROR_EMOJI, GREEN, RED, SUCCESS_EMOJI, WHITE, YELLOW
+
+
+# ─── Localized key bindings ────────────────────────────────────────────────────
+# Textual's Footer renders Binding.description verbatim, and BINDINGS are
+# class-level constants evaluated at import time -- long before the user picks
+# a language. So BINDINGS descriptions hold i18n keys (e.g. "footer_next"), and
+# each node's per-instance binding map is rebuilt with t()-translated
+# descriptions. Always derived from the class's untranslated _merged_bindings
+# so it can be safely re-run after a language change (see GcheckApp.set_lang).
+# Descriptions that aren't locale keys (Textual's built-ins, hidden bindings)
+# pass through unchanged, since t() falls back to the key itself.
+
+def localize_bindings(node: DOMNode) -> None:
+    source = node._merged_bindings
+    if source is None:
+        return
+    node._bindings = BindingsMap.from_keys({
+        key: [replace(b, description=t(b.description)) if b.description else b for b in bindings]
+        for key, bindings in source.key_to_bindings.items()
+    })
+
+
+class LocalizedScreen(Screen):
+    """Screen whose Footer key hints are shown in the current language."""
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        localize_bindings(self)
 
 # ─── Diagnostic result formatting helpers ──────────────────────────────────────
 # Section titles and the diagnosis/recommendation narrative are translated via

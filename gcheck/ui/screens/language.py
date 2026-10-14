@@ -15,11 +15,10 @@
 from textual.app import ComposeResult
 from textual.containers import Container
 from textual.reactive import reactive
-from textual.screen import Screen
 from textual.widgets import Footer, Label, Static
 
 from ...i18n import t
-from ..widgets import AppHeader
+from ..widgets import AppHeader, LocalizedScreen
 from .trust import TrustScreen
 
 
@@ -45,7 +44,7 @@ class LangCard(Static, can_focus=True):
         self.screen.choose(self)
 
 
-class LanguageScreen(Screen):
+class LanguageScreen(LocalizedScreen):
     """Step 1 — pick a language. Choosing a card (click or Enter) is what
     advances; there is no separate Continue button."""
 
@@ -54,11 +53,11 @@ class LanguageScreen(Screen):
     _GRID_COLS = 2
 
     BINDINGS = [
-        ("left",  "move(-1, 0)", "Previous"),
-        ("right", "move(1, 0)",  "Next"),
-        ("up",    "move(0, -1)", "Up"),
-        ("down",  "move(0, 1)",  "Down"),
-        ("enter", "confirm",     "Select"),
+        ("left",  "move(-1, 0)", "footer_previous"),
+        ("right", "move(1, 0)",  "footer_next"),
+        ("up",    "move(0, -1)", "footer_up"),
+        ("down",  "move(0, 1)",  "footer_down"),
+        ("enter", "confirm",     "footer_select"),
     ]
 
     def compose(self) -> ComposeResult:

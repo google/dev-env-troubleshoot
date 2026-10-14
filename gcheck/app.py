@@ -34,7 +34,7 @@ from .i18n import detect_language, set_language, t
 from .ui.screens.language import LanguageScreen
 from .ui.screens.trust import TrustScreen
 from .ui.theme import BACKGROUND, GCHECK_DARK_THEME, WHITE
-from .ui.widgets import _mask_key
+from .ui.widgets import _mask_key, localize_bindings
 
 
 def _hex_to_rgb(value: str) -> tuple[int, int, int]:
@@ -125,7 +125,7 @@ class GcheckApp(App):
         # A dedicated action, distinct from the ctrl+c-triggered action_quit
         # override below -- ctrl+q must always quit outright, even while a
         # copyable TextArea (error box / fix box) is focused.
-        ("ctrl+q", "force_quit", "Quit"),
+        ("ctrl+q", "force_quit", "footer_quit"),
         # show=False: available via ctrl+s, but not worth a permanent Footer
         # slot for a niche, undiscoverable-by-design debug/support action.
         Binding("ctrl+s", "save_screenshot", "Save screenshot", show=False),
@@ -153,6 +153,7 @@ class GcheckApp(App):
         self.api_test_fail_count = 0
         self._force_exit_armed = False
         set_language(self.lang)
+        localize_bindings(self)
         signal.signal(signal.SIGINT, self._on_sigint)
 
     def on_key(self, event: events.Key) -> None:
@@ -221,6 +222,12 @@ class GcheckApp(App):
     def set_lang(self, lang: str) -> None:
         self.lang = lang
         set_language(lang)
+        # App-level bindings (ctrl+q "Quit") were translated at startup in
+        # the detected language; redo them now. Screens translate their own
+        # bindings on construction, so ones pushed after this pick it up.
+        localize_bindings(self)
+        if self.is_running:
+            self.refresh_bindings()
 
     def on_mount(self) -> None:
         if self.flag_lang:

@@ -221,3 +221,34 @@ async def test_scan_error_falls_back_to_manual_entry(mocker):
 
         message = screen.query_one("#api-finding-message", Label)
         assert message.renderable == t("api_finding_scan_error")
+
+
+async def test_ctrl_v_pastes_first_line_of_system_clipboard(mocker):
+    # cmd.exe's console delivers Ctrl+V as a plain keypress rather than a
+    # bracketed paste, so the input has to read the clipboard itself.
+    mocker.patch(
+        "gcheck.ui.screens.api_finding._read_clipboard_native",
+        return_value=f"  {STANDARD_KEY}\r\nsecond line\r\n",
+    )
+    app = GcheckApp(flag_lang="en")
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        screen = await _push_finding_screen(app, pilot, [], mocker)
+
+        await pilot.press("ctrl+v")
+        await pilot.pause()
+
+        assert screen.query_one("#api-finding-input").value == STANDARD_KEY
+
+
+async def test_ctrl_v_with_empty_clipboard_leaves_input_unchanged(mocker):
+    mocker.patch("gcheck.ui.screens.api_finding._read_clipboard_native", return_value="")
+    app = GcheckApp(flag_lang="en")
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        screen = await _push_finding_screen(app, pilot, [], mocker)
+
+        await pilot.press("ctrl+v")
+        await pilot.pause()
+
+        assert screen.query_one("#api-finding-input").value == ""

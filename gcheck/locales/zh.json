@@ -26,6 +26,12 @@
   "action_next": "下一步",
   "action_quit": "退出",
   "divider": "─────────────────────────────────────",
+  "footer_previous": "上一个",
+  "footer_next": "下一个",
+  "footer_up": "上",
+  "footer_down": "下",
+  "footer_select": "选择",
+  "footer_quit": "退出",
 
   "api_finding_title": "验证 Google Gemini API 密钥",
   "api_finding_notice": "针对 Gemini API 端点验证您的密钥。需要密钥？请前往 https://aistudio.google.com/ 获取。",

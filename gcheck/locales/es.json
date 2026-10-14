@@ -26,6 +26,12 @@
   "action_next": "Siguiente",
   "action_quit": "Salir",
   "divider": "─────────────────────────────────────",
+  "footer_previous": "Anterior",
+  "footer_next": "Siguiente",
+  "footer_up": "Arriba",
+  "footer_down": "Abajo",
+  "footer_select": "Seleccionar",
+  "footer_quit": "Salir",
 
   "api_finding_title": "Validar clave de API de Google Gemini",
   "api_finding_notice": "Valida tu clave con los endpoints de la API de Gemini. ¿Necesitas una clave? Consíguela en https://aistudio.google.com/",
