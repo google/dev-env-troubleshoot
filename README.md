@@ -1,10 +1,20 @@
 # gcheck CLI
 
-gcheck CLI — a troubleshooting tool for Google developers. Diagnoses network issues accessing Google APIs, and can optionally verify a `GEMINI_API_KEY` against the Gemini API as a final connectivity check.
+**English** | [中文](README.zh.md) | [Español](README.es.md) | [日本語](README.ja.md)
+
+gcheck is a lightweight CLI diagnostics tool built specifically for developers to streamline Google AI integration. No more writing ad hoc scripts to test APIs — it automatically scans your setup in seconds, helping you catch configuration issues early and get your first "Hello Gemini" running flawlessly.
 
 ---
 
-## Prerequisites
+## ✨ Key Features
+
+- 🚀 **Automated Gemini API Diagnostics**: Instantly troubleshoots your Google Gemini API calls. It automatically verifies network connectivity, Google Cloud Platform (GCP) project permissions, API keys, and model parameter settings to get you connected to Gemini faster than ever.
+- 📁 **Smart Project Directory Scanning**: Seamlessly detects project configurations directly within your workspace. It analyzes your local environment files, dependencies, and settings to pinpoint hidden integration bottlenecks.
+- 🛠️ **Clear Solutions for Confusing Errors**: Don't just find the bug — fix it. It replaces confusing error messages with plain, human-readable explanations and provides actionable, step-by-step guides to eliminate trial and error.
+
+---
+
+## 📋 Prerequisites
 
 - Python 3.10+
 - [pipx](https://pipx.pypa.io/stable/installation/) (recommended for install; not needed if using `pip` directly)
@@ -12,7 +22,7 @@ gcheck CLI — a troubleshooting tool for Google developers. Diagnoses network i
 
 ---
 
-## Install
+## 🚀 Install
 
 ### Quick install (recommended)
 
@@ -32,12 +42,14 @@ without reinstalling:
 ```
 
 If macOS/Linux blocks the script with `permission denied`, make it executable first, then rerun it:
+
 ```sh
 chmod +x install.sh
 ./install.sh
 ```
 
 If Windows blocks the script with an execution-policy error, run:
+
 ```powershell
 powershell -ExecutionPolicy Bypass -File install.ps1
 ```
@@ -63,7 +75,7 @@ pipx install --editable .
 
 ---
 
-## Configuration
+## ⚙️ Configuration
 
 Optional — only needed for the API key connectivity check. Copy `.env.example` to `.env` in your working directory and add your key:
 
@@ -73,7 +85,7 @@ GEMINI_API_KEY=your_api_key_here
 
 ---
 
-## Usage
+## 💻 Usage
 
 ```sh
 gcheck              # Select language in TUI
@@ -85,7 +97,7 @@ gcheck --lang ja    # 日本語
 
 ---
 
-## Uninstall
+## 🗑️ Uninstall
 
 ```sh
 pipx uninstall gcheck
@@ -103,7 +115,7 @@ To also remove `pipx` itself: `pipx uninstall-all` (removes every pipx-managed a
 
 ---
 
-## Testing
+## 🧪 Testing
 
 The test suite runs against a local checkout:
 
@@ -120,8 +132,7 @@ is covered and what deliberately isn't, see
 
 ---
 
-## License
+## 📄 License
 
 Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) for the
 full text.
-
