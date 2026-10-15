@@ -4,8 +4,6 @@
 
 gcheck es una herramienta ligera de diagnóstico por línea de comandos (CLI) diseñada específicamente para desarrolladores con el fin de simplificar la integración de Google AI. Ya no necesitas escribir scripts improvisados para probar las API: escanea tu configuración automáticamente en segundos, ayudándote a detectar problemas de configuración a tiempo y a ejecutar tu primer "Hello Gemini" sin contratiempos.
 
----
-
 ## ✨ Características principales
 
 - 🚀 **Diagnóstico automatizado de la API de Gemini**: Soluciona al instante los problemas en tus llamadas a la API de Google Gemini. Verifica automáticamente la conectividad de red, los permisos del proyecto en Google Cloud Platform (GCP), las claves de API y la configuración de parámetros del modelo para que te conectes a Gemini más rápido que nunca.
