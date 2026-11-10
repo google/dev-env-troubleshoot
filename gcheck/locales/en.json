@@ -49,11 +49,11 @@
 
   "api_test_title": "Testing Gemini API Key",
   "api_test_running": "Validating API key credentials with Google...",
-  "api_test_generating": "Sending diagnostic test prompt to model...",
+  "api_test_generating_model": "Sending diagnostic test prompt to {model}...",
   "api_test_prompt": "Respond with 'OK' if functional.",
   "api_test_success": "Gemini API key validated successfully.",
-  "api_test_reply_label": "Model Response:",
-  "api_test_empty_reply": "(empty response)",
+  "api_test_model_label": "Model tested: {model}",
+  "api_test_models_skipped": "Skipped (not available for this key): {models}",
   "api_test_blocked_reason": "Response was not generated. Status reason: {reason}",
   "api_test_no_generate_model": "API key is valid, but no text generation model was accessible for testing.",
   "api_test_stage_list_models": "validating API key",
@@ -115,8 +115,8 @@
 
   "api_rec_model_notfound_title": "Model Access Not Available",
   "api_rec_model_notfound_1": "The key is valid, but does not have access to the specified model.",
-  "api_rec_model_notfound_2": "Test with a generally available model like 'gemini-1.5-flash'.",
-  "api_rec_model_notfound_3": "Try testing again — this tool already auto-picks a supported model where possible.",
+  "api_rec_model_notfound_2": "To test a specific model, set the GCHECK_MODEL environment variable to a name listed at https://ai.google.dev/gemini-api/docs/models.",
+  "api_rec_model_notfound_3": "If GCHECK_MODEL is already set, check the spelling or unset it — gcheck then auto-picks a model this key can use.",
 
   "api_rec_unimplemented_title": "This operation isn't supported.",
   "api_rec_unimplemented_1": "This isn't a problem with your key — the model or operation being tested doesn't support this request at all.",

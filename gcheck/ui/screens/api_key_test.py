@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Optional, Sequence
+
 from rich.markup import escape
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal
@@ -20,6 +22,7 @@ from textual.widgets import Button, Footer, Label, Static, TextArea
 from textual import on, work
 
 from ...api_diagnostic import gemini as api_gemini
+from ...api_diagnostic import model_selection
 from ...api_diagnostic import recommendations as api_recommendations
 from ...api_diagnostic.models import ApiTestResult
 from ...i18n import t
@@ -196,27 +199,41 @@ class ApiKeyTestScreen(LocalizedScreen):
             self.app.call_from_thread(self._on_result, listed, "")
             return
 
-        model = api_gemini.pick_generate_model(listed)
-        if not model:
+        candidates = model_selection.rank_candidates(listed)
+        if not candidates:
             self.app.call_from_thread(self._on_result, listed, "")
             return
 
-        self.app.call_from_thread(self._set_status, t("api_test_generating"))
         # Ask in whichever language is currently selected, so a Chinese user
         # sees the model actually reply in Chinese here rather than English.
         prompt = t("api_test_prompt")
-        generated = api_gemini.generate(self._api_key, model, timeout=api_gemini.DEFAULT_TIMEOUT, prompt=prompt)
-        reply = api_gemini.reply_text(generated) if generated.ok else ""
-        self.app.call_from_thread(self._on_result, generated, reply)
 
-    def _on_result(self, result: ApiTestResult, reply: str = "") -> None:
+        # Walk the ranked candidates (GCHECK_MODEL alone if it's set), moving
+        # on only when a model itself is unavailable -- retired, unsupported,
+        # or out of per-model quota. Key/billing/network failures stop here,
+        # since they'd fail the same on every model and are the real answer.
+        def attempt(candidate: str) -> ApiTestResult:
+            self.app.call_from_thread(self._set_status, t("api_test_generating_model", model=candidate))
+            return api_gemini.generate(self._api_key, candidate, timeout=api_gemini.DEFAULT_TIMEOUT, prompt=prompt)
+
+        model, generated, tried = model_selection.try_candidates(candidates, attempt)
+        reply = api_gemini.reply_text(generated) if generated.ok else ""
+        self.app.call_from_thread(self._on_result, generated, reply, model, tried)
+
+    def _on_result(
+        self,
+        result: ApiTestResult,
+        reply: str = "",
+        model: Optional[str] = None,
+        tried: Sequence[str] = (),
+    ) -> None:
         # Runs on the UI thread (via call_from_thread). _on_result_inner does
         # a lot of i18n formatting and calls into api_recommendations.recommend()
         # -- anything raising there would propagate out of the event loop and
         # crash the app (Textual's exit_on_error) with the spinner still up and
         # the result box hidden. Fall back to a bare, can't-fail error render.
         try:
-            self._on_result_inner(result, reply)
+            self._on_result_inner(result, reply, model, tried)
         except BaseException as exc:  # noqa: BLE001
             self._render_fatal(exc)
 
@@ -252,7 +269,23 @@ class ApiKeyTestScreen(LocalizedScreen):
             except BaseException:  # noqa: BLE001
                 pass
 
-    def _on_result_inner(self, result: ApiTestResult, reply: str = "") -> None:
+    def _model_lines(self, model: Optional[str], tried: Sequence[str]) -> list[str]:
+        """'Model tested: X' plus, after a fallback, which models were skipped."""
+        if not model:
+            return []
+        lines = [f"[{WHITE}]{escape(t('api_test_model_label', model=model))}[/{WHITE}]"]
+        skipped = [m for m in tried if m != model]
+        if skipped:
+            lines.append(f"[{WHITE}]{escape(t('api_test_models_skipped', models=', '.join(skipped)))}[/{WHITE}]")
+        return lines
+
+    def _on_result_inner(
+        self,
+        result: ApiTestResult,
+        reply: str = "",
+        model: Optional[str] = None,
+        tried: Sequence[str] = (),
+    ) -> None:
         self._spinner_timer.stop()
         self.query_one("#api-test-status").display = False
 
@@ -264,12 +297,19 @@ class ApiKeyTestScreen(LocalizedScreen):
 
         error_label.display = False
         error_box.display = False
+        # Cleared on every (re)test; only set again below on a working model.
+        self.app.api_test_model = None
 
         if result.ok:
             lines = [f"[{GREEN}]{SUCCESS_EMOJI} {escape(t('api_test_success'))}[/{GREEN}]"]
             if result.stage == "generate":
-                shown = reply or t("api_test_empty_reply")
-                lines += ["", f"[{WHITE}]{escape(t('api_test_reply_label'))} {escape(shown)}[/{WHITE}]"]
+                # Remember the model that actually worked, so later steps
+                # (e.g. AI mode) can use the same one instead of guessing.
+                self.app.api_test_model = model
+                lines += ["", *self._model_lines(model, tried)]
+                # The model's reply itself (normally just "OK") isn't shown --
+                # "Model tested: X" under the success line says it all. Only an
+                # empty reply is worth surfacing, with its block reason if any.
                 if not reply:
                     reason = api_gemini.block_reason(result)
                     if reason:
@@ -304,6 +344,8 @@ class ApiKeyTestScreen(LocalizedScreen):
                 details.append(result.error_code)
             if details:
                 summary_lines.append(f"  [{RED}]{escape(' · '.join(details))}[/{RED}]")
+            if result.stage == "generate":
+                summary_lines += [f"  {line}" for line in self._model_lines(model, tried)]
             summary.update("\n".join(summary_lines))
 
             # The exact, unmodified message Google sent back -- in its own

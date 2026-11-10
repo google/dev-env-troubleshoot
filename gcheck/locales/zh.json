@@ -48,11 +48,11 @@
 
   "api_test_title": "正在测试 Gemini API 密钥",
   "api_test_running": "正在向 Google 验证 API 密钥凭证...",
-  "api_test_generating": "正在向模型发送诊断测试提示...",
+  "api_test_generating_model": "正在向 {model} 发送诊断测试提示...",
   "api_test_prompt": "如果功能正常，请回复 “OK”。",
   "api_test_success": "Gemini API 密钥验证成功。",
-  "api_test_reply_label": "模型响应：",
-  "api_test_empty_reply": "（空响应）",
+  "api_test_model_label": "测试所用模型：{model}",
+  "api_test_models_skipped": "已跳过（此密钥不可用）：{models}",
   "api_test_blocked_reason": "未生成响应。状态原因：{reason}",
   "api_test_no_generate_model": "API 密钥有效，但没有可用于测试的文本生成模型。",
   "api_test_stage_list_models": "验证 API 密钥",
@@ -114,8 +114,8 @@
 
   "api_rec_model_notfound_title": "无法访问模型",
   "api_rec_model_notfound_1": "密钥有效，但无权访问指定的模型。",
-  "api_rec_model_notfound_2": "请尝试使用普遍可用的模型，例如 'gemini-1.5-flash'。",
-  "api_rec_model_notfound_3": "请重新测试 — 本工具会自动选择一个可用的模型。",
+  "api_rec_model_notfound_2": "如需测试特定模型，请将环境变量 GCHECK_MODEL 设置为 https://ai.google.dev/gemini-api/docs/models 中列出的模型名称。",
+  "api_rec_model_notfound_3": "如果已设置 GCHECK_MODEL，请检查拼写或取消设置 —— gcheck 会自动选择此密钥可用的模型。",
 
   "api_rec_unimplemented_title": "此操作不受支持。",
   "api_rec_unimplemented_1": "这与你的密钥无关 —— 正在测试的模型或操作根本不支持此请求。",

@@ -28,3 +28,11 @@ def _reset_i18n_state():
     i18n._strings = {}
     yield
     i18n._strings = {}
+
+
+@pytest.fixture(autouse=True)
+def _no_model_override(monkeypatch):
+    """A GCHECK_MODEL set in the developer's shell would pin model selection
+    (fixed mode) and change which model every API test picks -- clear it so
+    results don't depend on the environment the suite runs in."""
+    monkeypatch.delenv("GCHECK_MODEL", raising=False)

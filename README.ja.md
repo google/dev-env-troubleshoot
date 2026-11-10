@@ -77,6 +77,12 @@ pipx install --editable .
 GEMINI_API_KEY=your_api_key_here
 ```
 
+デフォルトでは、gcheck はお使いのキーでアクセスできるモデルの中からテストするモデルを自動的に選択します（このリリースのテストに使用した `gemini-3.8-flash` を最優先し、次に `gemini-flash-latest` などの `-latest` エイリアス、次に最新の安定版 Flash モデルを選択）。モデルが廃止されている場合やキーで利用できない場合は、次の候補に自動的に切り替えます。特定のモデルに固定したい場合は、`GCHECK_MODEL` も設定してください：
+
+```
+GCHECK_MODEL=gemini-2.5-flash
+```
+
 ---
 
 ## 💻 使い方

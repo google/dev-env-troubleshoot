@@ -31,14 +31,17 @@ import urllib.error
 import urllib.request
 from typing import Any, Dict, List, Optional
 
+from . import model_selection
 from .models import ApiTestResult
 
 BASE = "https://generativelanguage.googleapis.com/v1beta"
 USER_AGENT = "gcheck/0.1 (+gemini key tester)"
 DEFAULT_TIMEOUT = 15.0
 
-# Preference order when picking a model for the generate step.
-_PREFERRED_MODELS = ("gemini-1.5-flash", "gemini-flash-latest", "gemini-1.5-flash-latest")
+# Ask for the maximum page size so every model the key can see comes back in
+# one call -- with Google's default (50) newer models can land on page 2 and
+# never be considered by model_selection.
+_LIST_PAGE_SIZE = 1000
 
 # Known-good CA bundle locations to fall back on when the interpreter's own
 # default trust store is empty/broken -- the classic python.org macOS installer
@@ -188,7 +191,9 @@ def _request(
 
 def list_models(api_key: str, timeout: float = DEFAULT_TIMEOUT) -> ApiTestResult:
     """Validate the key by listing available models."""
-    return _request(f"{BASE}/models", "list_models", api_key=api_key, timeout=timeout)
+    return _request(
+        f"{BASE}/models?pageSize={_LIST_PAGE_SIZE}", "list_models", api_key=api_key, timeout=timeout
+    )
 
 
 def generate(
@@ -219,30 +224,14 @@ def model_names(list_result: ApiTestResult) -> List[str]:
 
 
 def pick_generate_model(list_result: ApiTestResult) -> Optional[str]:
-    """Choose a model that supports generateContent, preferring a flash model."""
-    models = list_result.data.get("models", []) or []
+    """The best model to test, or ``None`` if none is usable.
 
-    supports = {}
-    for m in models:
-        # Tolerate a non-standard schema (e.g. a proxy returning `models` as a
-        # list of strings): skip anything that isn't Google's object shape
-        # rather than letting .get raise AttributeError up into the worker.
-        if not isinstance(m, dict):
-            continue
-        name = m.get("name")
-        if not isinstance(name, str):
-            name = ""
-        bare = name.split("/", 1)[-1] if name.startswith("models/") else name
-        methods = m.get("supportedGenerationMethods") or []
-        if not isinstance(methods, (list, tuple)):
-            methods = []
-        if bare and "generateContent" in methods:
-            supports[bare] = True
-
-    for preferred in _PREFERRED_MODELS:
-        if preferred in supports:
-            return preferred
-    return next(iter(supports), None)
+    Thin wrapper over :func:`model_selection.rank_candidates` (which honours
+    ``GCHECK_MODEL`` and ranks the rest) -- kept for callers that only need
+    the top pick rather than the whole fallback list.
+    """
+    candidates = model_selection.rank_candidates(list_result)
+    return candidates[0] if candidates else None
 
 
 def reply_text(generate_result: ApiTestResult) -> str:

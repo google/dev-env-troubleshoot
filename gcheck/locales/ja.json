@@ -49,11 +49,11 @@
 
   "api_test_title": "Gemini API キーをテスト中",
   "api_test_running": "Google で API キーの認証情報を検証しています...",
-  "api_test_generating": "モデルに診断用テストプロンプトを送信しています...",
+  "api_test_generating_model": "{model} に診断用テストプロンプトを送信中...",
   "api_test_prompt": "正常に動作している場合は「OK」と返答してください。",
   "api_test_success": "Gemini API キーの検証に成功しました。",
-  "api_test_reply_label": "モデルの応答：",
-  "api_test_empty_reply": "（空の応答）",
+  "api_test_model_label": "テストしたモデル：{model}",
+  "api_test_models_skipped": "スキップ（このキーでは利用不可）：{models}",
   "api_test_blocked_reason": "応答が生成されませんでした。ステータス理由：{reason}",
   "api_test_no_generate_model": "API キーは有効ですが、テストに使用できるテキスト生成モデルにアクセスできませんでした。",
   "api_test_stage_list_models": "API キーを検証中",
@@ -115,8 +115,8 @@
 
   "api_rec_model_notfound_title": "モデルへのアクセスができません",
   "api_rec_model_notfound_1": "キーは有効ですが、指定されたモデルへのアクセス権がありません。",
-  "api_rec_model_notfound_2": "'gemini-1.5-flash' のような一般提供されているモデルでテストしてください。",
-  "api_rec_model_notfound_3": "もう一度テストしてください — このツールは可能な場合、対応モデルを自動的に選択します。",
+  "api_rec_model_notfound_2": "特定のモデルをテストするには、https://ai.google.dev/gemini-api/docs/models に掲載されているモデル名を環境変数 GCHECK_MODEL に設定してください。",
+  "api_rec_model_notfound_3": "GCHECK_MODEL を設定済みの場合は、綴りを確認するか設定を解除してください — gcheck がこのキーで利用できるモデルを自動的に選択します。",
 
   "api_rec_unimplemented_title": "この操作はサポートされていません。",
   "api_rec_unimplemented_1": "これはキーの問題ではありません — テスト対象のモデルまたは操作が、このリクエストにまったく対応していません。",

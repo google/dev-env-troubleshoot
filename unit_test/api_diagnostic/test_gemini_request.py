@@ -309,7 +309,11 @@ def test_list_models_calls_request_with_models_endpoint(mocker):
     )
     result = gemini.list_models("my-key", timeout=3.0)
     assert result == "sentinel"
-    spy.assert_called_once_with(f"{gemini.BASE}/models", "list_models", api_key="my-key", timeout=3.0)
+    # pageSize=1000 so every model comes back in one page -- with Google's
+    # default page size newer models could be cut off and never considered.
+    spy.assert_called_once_with(
+        f"{gemini.BASE}/models?pageSize=1000", "list_models", api_key="my-key", timeout=3.0
+    )
 
 
 def test_generate_prefixes_bare_model_name_with_models(mocker):

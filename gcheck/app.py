@@ -151,6 +151,9 @@ class GcheckApp(App):
         self.lang = detect_language(flag_lang)
         self.flag_lang = flag_lang
         self.api_test_fail_count = 0
+        # Model that passed the API key test (set by ApiKeyTestScreen), so
+        # anything after it can reuse the exact model that was verified.
+        self.api_test_model: str | None = None
         self._force_exit_armed = False
         set_language(self.lang)
         localize_bindings(self)

@@ -49,11 +49,11 @@
 
   "api_test_title": "Probando clave de API de Gemini",
   "api_test_running": "Validando las credenciales de la clave de API con Google...",
-  "api_test_generating": "Enviando la solicitud de prueba de diagnóstico al modelo...",
+  "api_test_generating_model": "Enviando la solicitud de prueba de diagnóstico a {model}...",
   "api_test_prompt": "Responde con 'OK' si funciona correctamente.",
   "api_test_success": "La clave de API de Gemini se validó correctamente.",
-  "api_test_reply_label": "Respuesta del modelo:",
-  "api_test_empty_reply": "(respuesta vacía)",
+  "api_test_model_label": "Modelo probado: {model}",
+  "api_test_models_skipped": "Omitidos (no disponibles para esta clave): {models}",
   "api_test_blocked_reason": "No se generó la respuesta. Motivo del estado: {reason}",
   "api_test_no_generate_model": "La clave de API es válida, pero no se pudo acceder a ningún modelo de generación de texto para la prueba.",
   "api_test_stage_list_models": "validando la clave de API",
@@ -115,8 +115,8 @@
 
   "api_rec_model_notfound_title": "Acceso al modelo no disponible",
   "api_rec_model_notfound_1": "La clave es válida, pero no tiene acceso al modelo especificado.",
-  "api_rec_model_notfound_2": "Prueba con un modelo de disponibilidad general, como 'gemini-1.5-flash'.",
-  "api_rec_model_notfound_3": "Vuelve a intentarlo — esta herramienta ya selecciona automáticamente un modelo compatible cuando es posible.",
+  "api_rec_model_notfound_2": "Para probar un modelo específico, define la variable de entorno GCHECK_MODEL con un nombre de la lista en https://ai.google.dev/gemini-api/docs/models.",
+  "api_rec_model_notfound_3": "Si GCHECK_MODEL ya está definida, revisa la ortografía o elimínala — gcheck elegirá automáticamente un modelo que esta clave pueda usar.",
 
   "api_rec_unimplemented_title": "Esta operación no es compatible.",
   "api_rec_unimplemented_1": "No es un problema con tu clave — el modelo u operación que se está probando simplemente no admite esta solicitud.",

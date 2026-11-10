@@ -81,6 +81,12 @@ Optional — only needed for the API key connectivity check. Copy `.env.example`
 GEMINI_API_KEY=your_api_key_here
 ```
 
+By default gcheck picks the model to test automatically from the models your key can access (preferring `gemini-3.8-flash` -- the model this release is tested with -- then `-latest` aliases such as `gemini-flash-latest`, then the newest stable Flash model), and moves on to the next one if a model is retired or unavailable for your key. To pin a specific model instead, also set `GCHECK_MODEL`:
+
+```
+GCHECK_MODEL=gemini-2.5-flash
+```
+
 ---
 
 ## 💻 Usage

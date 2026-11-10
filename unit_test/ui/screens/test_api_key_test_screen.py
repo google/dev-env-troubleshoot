@@ -36,7 +36,7 @@ def _flash_model(methods=("generateContent",)):
     return {"name": "models/gemini-1.5-flash", "supportedGenerationMethods": list(methods)}
 
 
-async def test_successful_generate_shows_reply_and_hides_retry_recheck(mocker):
+async def test_successful_generate_shows_model_not_reply_and_hides_retry_recheck(mocker):
     list_result = ApiTestResult(ok=True, stage="list_models", data={"models": [_flash_model()]})
     generate_result = ApiTestResult(
         ok=True,
@@ -52,11 +52,13 @@ async def test_successful_generate_shows_reply_and_hides_retry_recheck(mocker):
         screen = ApiKeyTestScreen("fake-key")
         await _push_and_wait(app, pilot, screen)
 
-        # On success, everything (the reply included) is written to
-        # #api-test-summary -- #api-test-result-text is explicitly cleared.
+        # On success, everything is written to #api-test-summary --
+        # #api-test-result-text is explicitly cleared. The tested model is
+        # shown, but the model's reply text is not.
         summary = str(screen.query_one("#api-test-summary").renderable)
         assert t("api_test_success") in summary
-        assert "Hi there!" in summary
+        assert t("api_test_model_label", model="gemini-1.5-flash") in summary
+        assert "Hi there!" not in summary
         assert str(screen.query_one("#api-test-result-text").renderable) == ""
         assert screen.query_one("#btn-test-retry", Button).display is False
         assert screen.query_one("#btn-test-recheck", Button).display is False
@@ -205,3 +207,103 @@ async def test_troubleshooting_hint_appears_after_three_failures(mocker):
 
         assert app.api_test_fail_count == 3
         assert hint in str(screen.query_one("#api-test-result-text").renderable)
+
+
+# ---------------------------------------------------------------------------
+# Model selection / fallback (see api_diagnostic.model_selection)
+# ---------------------------------------------------------------------------
+
+
+def _models(*names):
+    return ApiTestResult(
+        ok=True,
+        stage="list_models",
+        data={"models": [{"name": f"models/{n}", "supportedGenerationMethods": ["generateContent"]} for n in names]},
+    )
+
+
+_REPLY_OK = ApiTestResult(ok=True, stage="generate", data={"candidates": [{"content": {"parts": [{"text": "OK"}]}}]})
+
+
+async def test_success_shows_tested_model_and_records_it_on_app(mocker):
+    mocker.patch("gcheck.api_diagnostic.gemini.list_models", return_value=_models("gemini-2.5-flash"))
+    mocker.patch("gcheck.api_diagnostic.gemini.generate", return_value=_REPLY_OK)
+
+    app = GcheckApp(flag_lang="en")
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        screen = ApiKeyTestScreen("some-key")
+        await _push_and_wait(app, pilot, screen)
+
+        summary = str(screen.query_one("#api-test-summary").renderable)
+        assert t("api_test_model_label", model="gemini-2.5-flash") in summary
+        assert app.api_test_model == "gemini-2.5-flash"
+
+
+async def test_unavailable_model_falls_back_to_next_candidate(mocker):
+    mocker.patch(
+        "gcheck.api_diagnostic.gemini.list_models",
+        return_value=_models("gemini-2.5-flash", "gemini-flash-latest"),
+    )
+    retired = ApiTestResult(
+        ok=False, stage="generate", http_status=404, error_status="NOT_FOUND", message="model not found"
+    )
+    generate_spy = mocker.patch(
+        "gcheck.api_diagnostic.gemini.generate",
+        side_effect=lambda key, model, **kw: retired if model == "gemini-flash-latest" else _REPLY_OK,
+    )
+
+    app = GcheckApp(flag_lang="en")
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        screen = ApiKeyTestScreen("some-key")
+        await _push_and_wait(app, pilot, screen)
+
+        assert [c.args[1] for c in generate_spy.call_args_list] == ["gemini-flash-latest", "gemini-2.5-flash"]
+        summary = str(screen.query_one("#api-test-summary").renderable)
+        assert t("api_test_success") in summary
+        assert t("api_test_model_label", model="gemini-2.5-flash") in summary
+        assert t("api_test_models_skipped", models="gemini-flash-latest") in summary
+        assert app.api_test_model == "gemini-2.5-flash"
+
+
+async def test_key_error_on_generate_does_not_try_other_models(mocker):
+    mocker.patch(
+        "gcheck.api_diagnostic.gemini.list_models",
+        return_value=_models("gemini-2.5-flash", "gemini-flash-latest"),
+    )
+    denied = ApiTestResult(
+        ok=False, stage="generate", http_status=403, error_status="PERMISSION_DENIED", message="denied"
+    )
+    generate_spy = mocker.patch("gcheck.api_diagnostic.gemini.generate", return_value=denied)
+
+    app = GcheckApp(flag_lang="en")
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        screen = ApiKeyTestScreen("some-key")
+        await _push_and_wait(app, pilot, screen)
+
+        assert generate_spy.call_count == 1
+        summary = str(screen.query_one("#api-test-summary").renderable)
+        assert t("api_test_model_label", model="gemini-flash-latest") in summary
+        assert app.api_test_model is None
+
+
+async def test_gcheck_model_override_is_used_without_fallback(mocker, monkeypatch):
+    monkeypatch.setenv("GCHECK_MODEL", "gemini-custom")
+    mocker.patch("gcheck.api_diagnostic.gemini.list_models", return_value=_models("gemini-flash-latest"))
+    retired = ApiTestResult(
+        ok=False, stage="generate", http_status=404, error_status="NOT_FOUND", message="model not found"
+    )
+    generate_spy = mocker.patch("gcheck.api_diagnostic.gemini.generate", return_value=retired)
+
+    app = GcheckApp(flag_lang="en")
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        screen = ApiKeyTestScreen("some-key")
+        await _push_and_wait(app, pilot, screen)
+
+        # Fixed mode: only the pinned model, and its failure is reported as-is.
+        assert [c.args[1] for c in generate_spy.call_args_list] == ["gemini-custom"]
+        result_text = str(screen.query_one("#api-test-result-text").renderable)
+        assert t("api_rec_model_notfound_title") in result_text

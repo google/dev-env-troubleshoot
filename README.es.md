@@ -77,6 +77,12 @@ Opcional — solo se necesita para verificar la conectividad de la clave de API.
 GEMINI_API_KEY=your_api_key_here
 ```
 
+De forma predeterminada, gcheck elige automáticamente el modelo que se va a probar entre los modelos a los que tu clave tiene acceso (dando preferencia a `gemini-3.8-flash`, el modelo con el que se probó esta versión, luego a los alias `-latest`, como `gemini-flash-latest`, y después al modelo Flash estable más reciente), y pasa al siguiente si un modelo se ha retirado o no está disponible para tu clave. Para fijar un modelo específico, define también `GCHECK_MODEL`:
+
+```
+GCHECK_MODEL=gemini-2.5-flash
+```
+
 ---
 
 ## 💻 Uso
